@@ -50,7 +50,7 @@
   
     <genesis-popover placement="bottom-start" id="danyskays">
         <span>
-          <vaadin-text-field id="kylie" placeholder="Date"  value="{{formatDate(value)}}"> <!-- prevent-invalid-input pattern="\d*/*\d*/*\d*/*" -->
+          <vaadin-text-field id="kylie" placeholder="Date" locale="[[locale]]" value="{{formatDate(value)}}"> <!-- prevent-invalid-input pattern="\d*/*\d*/*\d*/*" -->
             <iron-icon icon="vaadin:calendar" slot="suffix"></iron-icon><!--on-click="update"--> 
           </vaadin-text-field>
         </span>
@@ -83,27 +83,11 @@
 
       ready() {
         super.ready();
-        let months_map = new Map([
-            [ 'Jan', '01/31' ],
-            [ 'Fev', '02/28' ],
-            [ 'Mar', '03/31' ],
-            [ 'Apr', '04/30' ],
-            [ 'May', '05/31' ],
-            [ 'Jun', '06/30' ],
-            [ 'Jul', '07/31' ],
-            [ 'Aug', '08/31' ],
-            [ 'Sep', '09/30' ],
-            [ 'Oct', '10/31' ],
-            [ 'Nov', '11/30' ],
-            [ 'Dec', '12/31' ]
-        ]);
-
-        //TODO Replace value for feb leapyear
-
-        months_map.forEach((value, key)=>{
+        
+        Array.from(Array(12).keys()).forEach(v=>{
           let month=document.createElement('vaadin-button');
-          month.appendChild(document.createTextNode(key));
-          month.addEventListener('click', e => {this.updateField(value+"/"+ this.year)});
+          month.appendChild(document.createTextNode(this.localeMonth(v)));
+          month.addEventListener('click', e => {this.updateField(new Date(this.year, v+1, 0))});
           this.$.months_div.appendChild(month);    
         });
 
@@ -113,8 +97,8 @@
         this.$.danyskays.setAttribute('pressed','true');
       }
 
-      updateField(field) {
-        this.$.kylie.setAttribute('value',field);
+      updateField(date) {
+        this.$.kylie.setAttribute('value',this.formatDate(date));
       }
 
       previousYear(field) {
@@ -126,16 +110,26 @@
       }
 
       formatDate(date){
-        return ''+date.getDate()+'/'+(date.getMonth()+1)+'/'+date.getFullYear();
+        return new Date(date.getFullYear(), date.getMonth()+1, 0).toLocaleDateString(this.locale);
+      }
+
+      localeMonth(monthNum){
+        let monthName=new Date(2000, monthNum, 1).toLocaleDateString(this.locale, {month:'short'});
+        return monthName.charAt(0).toUpperCase()+monthName.substring(1);
       }
       
       static get properties() {
         return {
           value: {
-            type: String,
+            type: Date,
             value: new Date()
           },
           
+          locale: {
+            type: String,
+            value: 'fr-FR'
+          },
+
           year: {
             type: Number,
             value: new Date().getFullYear()
