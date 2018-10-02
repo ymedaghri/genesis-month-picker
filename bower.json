@@ -1,11 +1,19 @@
 {
   "name": "genesis-month-picker",
   "description": "The Genesis Month Picker is a component that allow to navigate quickly between months to select an end month date.",
+  "homepage": "https://github.com/bisam-rd/genesis-month-picker.git",
   "main": "genesis-month-picker.html",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0",
     "genesis-popover": "ymedaghri/genesis-popover#^1.0.5",
-    "vaadin-overlay": "vaadin/vaadin-overlay#^3.2.0-alpha3",
     "vaadin-lumo-styles": "vaadin/vaadin-lumo-styles#^1.2.0",
     "vaadin-text-field": "vaadin/vaadin-text-field#^2.1.2",
     "vaadin-button": "vaadin/vaadin-button#^2.1.0",

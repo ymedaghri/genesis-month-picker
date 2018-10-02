@@ -50,7 +50,7 @@
   
     <genesis-popover placement="bottom-start" id="danyskays">
         <span>
-          <vaadin-text-field id="kylie" placeholder="Date" locale="[[locale]]" value="{{formatDate(value)}}"> <!-- prevent-invalid-input pattern="\d*/*\d*/*\d*/*" -->
+          <vaadin-text-field id="kylie" placeholder="Date" locale="[[locale]]" value="{{renderedValue}}"> <!-- prevent-invalid-input pattern="\d*/*\d*/*\d*/*" -->
             <iron-icon icon="vaadin:calendar" slot="suffix"></iron-icon><!--on-click="update"--> 
           </vaadin-text-field>
         </span>
@@ -91,6 +91,9 @@
           this.$.months_div.appendChild(month);    
         });
 
+        this.renderedValue=this.formatDate(this.value);
+        this.year=this.value.getFullYear();
+
       }
 
       update(){
@@ -117,11 +120,21 @@
         let monthName=new Date(2000, monthNum, 1).toLocaleDateString(this.locale, {month:'short'});
         return monthName.charAt(0).toUpperCase()+monthName.substring(1);
       }
-      
+
+
+       _yearChanged(newValue, oldValue){
+         if(newValue!="" && newValue!=oldValue)
+         {
+            this.value.setYear(newValue);
+            this.renderedValue = this.formatDate(this.value);
+         }
+      }
+
       static get properties() {
         return {
           value: {
             type: Date,
+            reflectToAttribute: true,
             value: new Date()
           },
           
@@ -132,7 +145,13 @@
 
           year: {
             type: Number,
-            value: new Date().getFullYear()
+            observer: '_yearChanged',
+            reflectToAttribute: true
+          },
+
+          renderedValue: {
+            type: String,
+            reflectToAttribute: true
           }
         };
       }
