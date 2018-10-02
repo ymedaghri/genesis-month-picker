@@ -1,0 +1,149 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../genesis-popover/genesis-popover.html">
+
+<link rel="import" href="../vaadin-text-field/vaadin-text-field.html">
+<link rel="import" href="../vaadin-button/vaadin-button.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../vaadin-icons/vaadin-icons.html">
+
+<dom-module id="genesis-month-picker">
+  <template>
+    <style>
+      genesis-popover {   
+        --genesis-popover-max-width:230px;
+      }
+
+      :host {
+        display: block;
+      }
+
+      [part="column-slot"] {
+        display: flex;
+        flex-direction: column;
+        flex:1;
+        align-items: center
+      }
+
+      [part="months_div"] {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        justify-content: center;
+      }
+
+      [part="months_div"] vaadin-button {
+        margin-right: 3px;
+        margin-left: 3px;
+      }
+
+      [part="year-field"] {
+        display: flex;
+      }
+
+      [part="year-field"] * {
+        margin-top: auto;
+        margin-bottom: auto;
+      }
+     
+ 
+    </style>
+  
+    <genesis-popover placement="bottom-start" id="danyskays">
+        <span>
+          <vaadin-text-field id="kylie" placeholder="Date"  value="{{formatDate(value)}}"> <!-- prevent-invalid-input pattern="\d*/*\d*/*\d*/*" -->
+            <iron-icon icon="vaadin:calendar" slot="suffix"></iron-icon><!--on-click="update"--> 
+          </vaadin-text-field>
+        </span>
+        <div slot="content" part="content-slot">
+            <div part="column-slot">
+                <div part="year-field">
+                    <iron-icon icon="vaadin:caret-left" on-click="previousYear"></iron-icon>
+                      <vaadin-text-field value="{{year}}" prevent-invalid-input pattern="\d*" theme="align-center"></vaadin-text-field>
+                    <iron-icon icon="vaadin:caret-right" on-click="nextYear" ></iron-icon>
+                </div>
+                
+                <div id="months_div" part="months_div"></div>       
+            </div>
+        </div>
+    </genesis-popover>
+  </template>
+
+  <script>
+    /**
+     * `genesis-month-picker`
+     * The Genesis Month Picker is a component that allows to navigate quickly between months to select an end month date.
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class GenesisMonthPicker extends
+     Polymer.Element {
+      static get is() { return 'genesis-month-picker'; }
+
+      ready() {
+        super.ready();
+        let months_map = new Map([
+            [ 'Jan', '01/31' ],
+            [ 'Fev', '02/28' ],
+            [ 'Mar', '03/31' ],
+            [ 'Apr', '04/30' ],
+            [ 'May', '05/31' ],
+            [ 'Jun', '06/30' ],
+            [ 'Jul', '07/31' ],
+            [ 'Aug', '08/31' ],
+            [ 'Sep', '09/30' ],
+            [ 'Oct', '10/31' ],
+            [ 'Nov', '11/30' ],
+            [ 'Dec', '12/31' ]
+        ]);
+
+        //TODO Replace value for feb leapyear
+
+        months_map.forEach((value, key)=>{
+          let month=document.createElement('vaadin-button');
+          month.appendChild(document.createTextNode(key));
+          month.addEventListener('click', e => {this.updateField(value+"/"+ this.year)});
+          this.$.months_div.appendChild(month);    
+        });
+
+      }
+
+      update(){
+        this.$.danyskays.setAttribute('pressed','true');
+      }
+
+      updateField(field) {
+        this.$.kylie.setAttribute('value',field);
+      }
+
+      previousYear(field) {
+        this.year--;
+      }
+
+      nextYear(field) {
+        this.year++;
+      }
+
+      formatDate(date){
+        return ''+date.getDate()+'/'+(date.getMonth()+1)+'/'+date.getFullYear();
+      }
+      
+      static get properties() {
+        return {
+          value: {
+            type: String,
+            value: new Date()
+          },
+          
+          year: {
+            type: Number,
+            value: new Date().getFullYear()
+          }
+        };
+      }
+    }
+
+    window.customElements.define(GenesisMonthPicker.is, GenesisMonthPicker);
+  </script>
+</dom-module>

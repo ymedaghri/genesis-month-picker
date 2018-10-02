@@ -1,0 +1,22 @@
+{
+  "name": "genesis-month-picker",
+  "description": "The Genesis Month Picker is a component that allow to navigate quickly between months to select an end month date.",
+  "main": "genesis-month-picker.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^2.0.0",
+    "genesis-popover": "ymedaghri/genesis-popover#^1.0.5",
+    "vaadin-overlay": "vaadin/vaadin-overlay#^3.2.0-alpha3",
+    "vaadin-lumo-styles": "vaadin/vaadin-lumo-styles#^1.2.0",
+    "vaadin-text-field": "vaadin/vaadin-text-field#^2.1.2",
+    "vaadin-button": "vaadin/vaadin-button#^2.1.0",
+    "vaadin-icons": "vaadin/vaadin-icons#^4.2.0"
+  },
+  "devDependencies": {
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0",
+    "web-component-tester": "Polymer/web-component-tester#^6.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"
+  },
+  "resolutions": {
+    "polymer": "^2.0.0"
+  }
+}
