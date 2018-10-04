@@ -44,7 +44,6 @@
         margin-top: auto;
         margin-bottom: auto;
       }
-     
  
     </style>
   
@@ -61,7 +60,6 @@
                       <vaadin-text-field id="yearField" prevent-invalid-input pattern="\d*" value="{{renderedYear}}" theme="align-center"></vaadin-text-field>
                     <iron-icon icon="vaadin:caret-right" on-click="nextYear" ></iron-icon>
                 </div>
-                
                 <div id="calendar"></div>
             </div>
         </div>
@@ -96,17 +94,22 @@
           let monthButton=document.createElement('vaadin-button');
           monthButton.appendChild(document.createTextNode(this.getLocaleMonthName(v)));
           monthButton.addEventListener('click', e => {
-            this.value = new Date(this.value.getFullYear(), v+1, 0)
+            this.value = new Date(this.renderedYear, v+1, 0)
             this.updateRenderedDate()
             });
           currentMonthsRow.appendChild(monthButton);
         });
         this.$.calendar.appendChild(currentMonthsRow);
 
-        let now = new Date();
-        this.value = new Date(now.getFullYear(), now.getMonth()+1, 0)
-        this.updateRenderedDate();
-        this.updateRenderedYear();
+        let momentObject = moment(this.value, "YYYY-MM-DD", true)
+        if(this.value && momentObject.isValid()) {
+          this.value = new Date(momentObject.year(), momentObject.month()+1, 0);
+          this.updateRenderedDate();
+          this.updateRenderedYear();
+        }
+        else {
+          this.renderedYear = moment().year();
+        }
       }
 
       previousYear(){
@@ -158,7 +161,7 @@
           return;
         }
         
-        let newDate = new Date(newValue, this.value.getMonth()+1, 0);
+        let newDate = new Date(newValue, this.value.getMonth() + 1, 0);
         if(newDate.getFullYear() == newValue){
           this.value = newDate;
           this.updateRenderedDate();
