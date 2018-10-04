@@ -58,7 +58,7 @@
             <div part="column-slot">
                 <div part="year-field">
                     <iron-icon icon="vaadin:caret-left" on-click="previousYear"></iron-icon>
-                      <vaadin-text-field id="yearField" prevent-invalid-input pattern="\d*" theme="align-center"></vaadin-text-field>
+                      <vaadin-text-field id="yearField" prevent-invalid-input pattern="\d*" value="{{renderedYear}}" theme="align-center"></vaadin-text-field>
                     <iron-icon icon="vaadin:caret-right" on-click="nextYear" ></iron-icon>
                 </div>
                 
@@ -102,17 +102,11 @@
           currentMonthsRow.appendChild(monthButton);
         });
         this.$.calendar.appendChild(currentMonthsRow);
-        this.value = new Date(this.value.getFullYear(), this.value.getMonth()+1, 0)
+
+        let now = new Date();
+        this.value = new Date(now.getFullYear(), now.getMonth()+1, 0)
         this.updateRenderedDate();
         this.updateRenderedYear();
-      }
-
-      updateRenderedDate() {
-        this.renderedDate = this.getFormattedDate();
-      }
-
-      updateRenderedYear(){
-        this.$.yearField.value = this.value.getFullYear();
       }
 
       previousYear(){
@@ -129,6 +123,14 @@
         this.updateRenderedYear();
       }
 
+      updateRenderedDate() {
+        this.renderedDate = this.getFormattedDate();
+      }
+
+      updateRenderedYear(){
+        this.renderedYear = this.value.getFullYear();
+      }
+
       getFormattedDate(){
         return this.value.toLocaleDateString(this.locale);
       }
@@ -138,17 +140,28 @@
         return monthName.charAt(0).toUpperCase()+monthName.substring(1);
       }
 
-      _renderedDateChanged(newValue, oldValue){
-        if(newValue == this.getFormattedDate()){
+      _renderedDateChanged(newValue, oldValue) {
+        if(!this.value || newValue == this.getFormattedDate()){
           return;
         }
         
-        let myMomentOfGlory = moment(newValue, this.formats[this.locale].toUpperCase(),true);
-
-        if(myMomentOfGlory.isValid()){
-          this.value = new Date(myMomentOfGlory.format('Y'),myMomentOfGlory.format('M'),0);
+        let momentObject = moment(newValue, this.formats[this.locale].toUpperCase(),true);
+        if(momentObject.isValid()){
+          this.value = new Date(momentObject.format('Y'),momentObject.format('M'),0);
           this.updateRenderedDate();
           this.updateRenderedYear();
+        }
+      }
+
+      _renderedYearChanged(newValue, oldValue) {
+        if(!this.value || newValue == this.value.getFullYear()){
+          return;
+        }
+        
+        let newDate = new Date(newValue, this.value.getMonth()+1, 0);
+        if(newDate.getFullYear() == newValue){
+          this.value = newDate;
+          this.updateRenderedDate();
         }
       }
 
@@ -156,8 +169,7 @@
         return {
           value: {
             type: Date,
-            reflectToAttribute: true,
-            value: new Date()
+            reflectToAttribute: true
           },
           
           locale: {
@@ -168,6 +180,12 @@
           renderedDate: {
             type: String,
             observer: '_renderedDateChanged',
+            reflectToAttribute: true
+          },
+
+          renderedYear: {
+            type: String,
+            observer: '_renderedYearChanged',
             reflectToAttribute: true
           },
 
