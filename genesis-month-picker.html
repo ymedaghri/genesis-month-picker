@@ -18,6 +18,11 @@
         display: block;
       }
 
+      #month-picker {
+        display: flex;
+        flex-direction: row;
+      }
+
       [part="column-slot"] {
         display: flex;
         flex-direction: column;
@@ -44,26 +49,41 @@
         margin-top: auto;
         margin-bottom: auto;
       }
+
+      [part="arrows"] {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      [part="arrows"] * {
+        max-height: 15px;
+      }
  
     </style>
-  
-    <genesis-popover placement="bottom-start" id="popOver">
-        <span>
-          <vaadin-text-field id="dateField" placeholder="Date" locale="[[locale]]" value="{{renderedDate}}"> <!-- prevent-invalid-input pattern="\d*/*\d*/*\d*/*" -->
-            <iron-icon icon="vaadin:calendar" slot="suffix"></iron-icon><!--on-click="update"--> 
-          </vaadin-text-field>
-        </span>
-        <div slot="content" part="content-slot">
-            <div part="column-slot">
-                <div part="year-field">
-                    <iron-icon icon="vaadin:caret-left" on-click="previousYear"></iron-icon>
+    <div id="month-picker">
+      <genesis-popover placement="bottom-start" id="popOver">
+          <span>
+            <vaadin-text-field id="dateField" placeholder="Date" locale="[[locale]]" value="{{renderedDate}}"> <!-- prevent-invalid-input pattern="\d*/*\d*/*\d*/*" -->
+              <iron-icon icon="vaadin:calendar" slot="suffix"></iron-icon><!--on-click="update"--> 
+            </vaadin-text-field>
+          </span>
+          <div slot="content" part="content-slot">
+              <div part="column-slot">
+                  <div part="year-field">
+                      <iron-icon icon="vaadin:caret-left" on-click="previousYear"></iron-icon>
                       <vaadin-text-field id="yearField" prevent-invalid-input pattern="\d*" value="{{renderedYear}}" theme="align-center"></vaadin-text-field>
-                    <iron-icon icon="vaadin:caret-right" on-click="nextYear" ></iron-icon>
-                </div>
-                <div id="calendar"></div>
-            </div>
-        </div>
-    </genesis-popover>
+                      <iron-icon icon="vaadin:caret-right" on-click="nextYear"></iron-icon>
+                  </div>
+                  <div id="calendar"></div>
+              </div>
+          </div>
+      </genesis-popover>
+      <div part="arrows">
+          <iron-icon icon="vaadin:caret-up" on-click="nextMonth"></iron-icon>
+          <iron-icon icon="vaadin:caret-down" on-click="previousMonth"></iron-icon>
+      </div>
+    </div>
   </template>
 
   <script>
@@ -82,6 +102,18 @@
     
       ready() {
         super.ready();
+        this.createCalendar();
+
+        let momentObject = moment(this.value, "YYYY-MM-DD", true)
+        if(this.value && momentObject.isValid()) {
+          this.valueDate = new Date(momentObject.year(), momentObject.month()+1, 0);
+        }
+        else {
+          this.renderedYear = moment().year();
+        }
+      }
+
+      createCalendar(){
         let currentMonthsRow;
         Array.from(Array(12).keys()).forEach(v=>{
           if (v%3 == 0){
@@ -94,22 +126,27 @@
           let monthButton=document.createElement('vaadin-button');
           monthButton.appendChild(document.createTextNode(this.getLocaleMonthName(v)));
           monthButton.addEventListener('click', e => {
-            this.value = new Date(this.renderedYear, v+1, 0)
-            this.updateRenderedDate()
-            });
+            this.valueDate = new Date(this.renderedYear, v+1, 0)
+          });
           currentMonthsRow.appendChild(monthButton);
         });
         this.$.calendar.appendChild(currentMonthsRow);
+      }
 
-        let momentObject = moment(this.value, "YYYY-MM-DD", true)
-        if(this.value && momentObject.isValid()) {
-          this.value = new Date(momentObject.year(), momentObject.month()+1, 0);
-          this.updateRenderedDate();
-          this.updateRenderedYear();
+      previousMonth(){
+        this.addMonth(-1);
+      }
+
+      nextMonth(){
+        this.addMonth(1);
+      }
+
+      addMonth(monthToAdd) {
+        if(!this.valueDate){
+          let now = new Date();
+          this.valueDate = new Date(now.getFullYear(), now.getMonth(),0);
         }
-        else {
-          this.renderedYear = moment().year();
-        }
+        this.valueDate = new Date(this.valueDate.getFullYear(), this.valueDate.getMonth() + 1 + monthToAdd, 0);
       }
 
       previousYear(){
@@ -121,21 +158,15 @@
       }
 
       addYear(yearToAdd) {
-        this.value = new Date(this.value.getFullYear() + yearToAdd, this.value.getMonth()+1, 0);
-        this.updateRenderedDate();
-        this.updateRenderedYear();
-      }
-
-      updateRenderedDate() {
-        this.renderedDate = this.getFormattedDate();
-      }
-
-      updateRenderedYear(){
-        this.renderedYear = this.value.getFullYear();
+        if(!this.valueDate){
+          let now = new Date();
+          this.valueDate = new Date(now.getFullYear(), now.getMonth(),0);
+        }
+        this.valueDate = new Date(this.valueDate.getFullYear() + yearToAdd, this.valueDate.getMonth() + 1, 0);
       }
 
       getFormattedDate(){
-        return this.value.toLocaleDateString(this.locale);
+        return this.valueDate.toLocaleDateString(this.locale);
       }
 
       getLocaleMonthName(monthNum){
@@ -143,36 +174,56 @@
         return monthName.charAt(0).toUpperCase()+monthName.substring(1);
       }
 
+      updateRenderedDate() {
+        this.renderedDate = this.getFormattedDate();
+      }
+
+      updateRenderedYear(){
+        this.renderedYear = this.valueDate.getFullYear();
+      }
+
+      updateValue(){
+        this.value = moment(this.valueDate).format("YYYY-MM-DD");
+      }
+
       _renderedDateChanged(newValue, oldValue) {
-        if(!this.value || newValue == this.getFormattedDate()){
+        if(!this.valueDate || newValue == this.getFormattedDate()){
           return;
         }
         
         let momentObject = moment(newValue, this.formats[this.locale].toUpperCase(),true);
         if(momentObject.isValid()){
-          this.value = new Date(momentObject.format('Y'),momentObject.format('M'),0);
-          this.updateRenderedDate();
-          this.updateRenderedYear();
+          this.valueDate = new Date(momentObject.format('Y'),momentObject.format('M'),0);
         }
       }
 
       _renderedYearChanged(newValue, oldValue) {
-        if(!this.value || newValue == this.value.getFullYear()){
+        if(!this.valueDate || newValue == this.valueDate.getFullYear()){
           return;
         }
         
-        let newDate = new Date(newValue, this.value.getMonth() + 1, 0);
+        let newDate = new Date(newValue, this.valueDate.getMonth() + 1, 0);
         if(newDate.getFullYear() == newValue){
-          this.value = newDate;
-          this.updateRenderedDate();
+          this.valueDate = newDate;
         }
+      }
+
+      _valueDateChanged(newValue, oldValue){
+          this.updateRenderedDate();
+          this.updateRenderedYear();
+          this.updateValue();
       }
 
       static get properties() {
         return {
           value: {
-            type: Date,
+            type: String,
             reflectToAttribute: true
+          },
+
+          valueDate: {
+            type: Date,
+            observer: '_valueDateChanged'
           },
           
           locale: {
