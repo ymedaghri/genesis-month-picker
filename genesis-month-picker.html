@@ -103,14 +103,7 @@
       ready() {
         super.ready();
         this.createCalendar();
-
-        let momentObject = moment(this.value, "YYYY-MM-DD", true)
-        if(this.value && momentObject.isValid()) {
-          this.valueDate = new Date(momentObject.year(), momentObject.month()+1, 0);
-        }
-        else {
-          this.renderedYear = moment().year();
-        }
+        this.updateValueDateFromValue();
       }
 
       createCalendar(){
@@ -131,6 +124,16 @@
           currentMonthsRow.appendChild(monthButton);
         });
         this.$.calendar.appendChild(currentMonthsRow);
+      }
+
+      updateValueDateFromValue(){
+        let momentObject = moment(this.value, "YYYY-MM-DD", true);
+        if(this.value && momentObject.isValid()) {
+          this.valueDate = new Date(momentObject.year(), momentObject.month()+1, 0);
+        }
+        else {
+          this.renderedYear = moment().year();
+        }
       }
 
       previousMonth(){
@@ -208,6 +211,14 @@
         }
       }
 
+      _valueChanged(newValue, oldValue) {
+        if(!this.valueDate || newValue == moment(this.valueDate).format("YYYY-MM-DD")){
+          return;
+        }
+        
+        this.updateValueDateFromValue();
+      }
+
       _valueDateChanged(newValue, oldValue){
           this.updateRenderedDate();
           this.updateRenderedYear();
@@ -218,7 +229,8 @@
         return {
           value: {
             type: String,
-            reflectToAttribute: true
+            reflectToAttribute: true,
+            observer: '_valueChanged'
           },
 
           valueDate: {
