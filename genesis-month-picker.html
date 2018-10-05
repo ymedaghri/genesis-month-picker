@@ -59,6 +59,10 @@
       [part="arrows"] * {
         max-height: 15px;
       }
+
+      vaadin-button {
+        min-width: calc(var(--lumo-button-size) * 2.5);
+      }
  
     </style>
     <div id="month-picker">
@@ -98,30 +102,41 @@
     class GenesisMonthPicker extends
      Polymer.Element {
 
-    static get is() { return 'genesis-month-picker'; }
-    
+      static get is() { return 'genesis-month-picker'; }
+      
+      constructor(){
+        super();
+        this.initButtonsMap();
+      }
+
       ready() {
         super.ready();
         this.createCalendar();
         this.updateValueDateFromValue();
       }
 
-      createCalendar(){
-        let currentMonthsRow;
+      initButtonsMap(){  
+        this.buttonsMap = new Map();
         Array.from(Array(12).keys()).forEach(v=>{
-          if (v%3 == 0){
-            if(v != 0){
-              this.$.calendar.appendChild(currentMonthsRow);
-            }
-            currentMonthsRow = document.createElement('div');
-            currentMonthsRow.setAttribute("part","months_row");
-          }
-          let monthButton=document.createElement('vaadin-button');
-          monthButton.appendChild(document.createTextNode(this.getLocaleMonthName(v)));
+          let monthButton = document.createElement('vaadin-button');
           monthButton.addEventListener('click', e => {
             this.valueDate = new Date(this.renderedYear, v+1, 0)
           });
-          currentMonthsRow.appendChild(monthButton);
+          monthButton.setAttribute("theme","small");
+          this.buttonsMap.set(v, monthButton);
+        });
+      }
+
+      createCalendar(){
+        let currentMonthsRow;
+        this.buttonsMap.forEach((value, key) => {
+          value.appendChild(document.createTextNode(this.getLocaleMonthName(key)));
+          if (key%3 == 0){
+            currentMonthsRow = document.createElement('div');
+            currentMonthsRow.setAttribute("part","months_row");
+            this.$.calendar.appendChild(currentMonthsRow);
+          }
+          currentMonthsRow.appendChild(value);
         });
         this.$.calendar.appendChild(currentMonthsRow);
       }
@@ -189,6 +204,12 @@
         this.value = moment(this.valueDate).format("YYYY-MM-DD");
       }
 
+      selectMonthButton(newValue, oldValue){
+        this.buttonsMap.get(newValue.getMonth()).setAttribute("theme", "primary small");
+        if(oldValue && newValue.getMonth() != oldValue.getMonth())
+          this.buttonsMap.get(oldValue.getMonth()).setAttribute("theme", "small");
+      }
+
       _renderedDateChanged(newValue, oldValue) {
         if(!this.valueDate || newValue == this.getFormattedDate()){
           return;
@@ -212,7 +233,7 @@
       }
 
       _valueChanged(newValue, oldValue) {
-        if(!this.valueDate || newValue == moment(this.valueDate).format("YYYY-MM-DD")){
+        if(newValue == moment(this.valueDate).format("YYYY-MM-DD")){
           return;
         }
         
@@ -223,6 +244,7 @@
           this.updateRenderedDate();
           this.updateRenderedYear();
           this.updateValue();
+          this.selectMonthButton(newValue, oldValue);
       }
 
       static get properties() {
@@ -253,6 +275,10 @@
             type: String,
             observer: '_renderedYearChanged',
             reflectToAttribute: true
+          },
+
+          buttonsMap: {
+            type: Map
           },
 
           formats: {
