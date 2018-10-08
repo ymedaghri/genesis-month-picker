@@ -60,15 +60,15 @@
         max-height: 15px;
       }
 
-      vaadin-button {
+      #calendar vaadin-button {
         min-width: calc(var(--lumo-button-size) * 2.5);
       }
- 
+
     </style>
     <div id="month-picker">
       <genesis-popover placement="bottom-start" id="popOver">
           <span>
-            <vaadin-text-field id="dateField" placeholder="Date" locale="[[locale]]" value="{{renderedDate}}"> <!-- prevent-invalid-input pattern="\d*/*\d*/*\d*/*" -->
+            <vaadin-text-field id="dateField" placeholder="Date" locale="[[locale]]" value="{{dateField}}"> <!-- prevent-invalid-input pattern="\d*/*\d*/*\d*/*" -->
               <iron-icon icon="vaadin:calendar" slot="suffix"></iron-icon><!--on-click="update"--> 
             </vaadin-text-field>
           </span>
@@ -76,13 +76,13 @@
               <div part="column-slot">
                   <div part="year-field">
                       <iron-icon icon="vaadin:caret-left" on-click="previousYear"></iron-icon>
-                      <vaadin-text-field id="yearField" prevent-invalid-input pattern="\d*" value="{{renderedYear}}" theme="align-center"></vaadin-text-field>
+                      <vaadin-text-field id="yearField" prevent-invalid-input pattern="\d*" value="{{yearField}}" theme="align-center"></vaadin-text-field>
                       <iron-icon icon="vaadin:caret-right" on-click="nextYear"></iron-icon>
                   </div>
                   <div id="calendar"></div>
               </div>
           </div>
-      </genesis-popover>
+        </genesis-popover>
       <div part="arrows">
           <iron-icon icon="vaadin:caret-up" on-click="nextMonth"></iron-icon>
           <iron-icon icon="vaadin:caret-down" on-click="previousMonth"></iron-icon>
@@ -106,31 +106,31 @@
       
       constructor(){
         super();
-        this.initButtonsMap();
+        this.initAndStoreButtonsMap();
       }
 
-      ready() {
-        super.ready();
-        this.createCalendar();
-        this.updateValueDateFromValue();
-      }
-
-      initButtonsMap(){  
+      initAndStoreButtonsMap(){  
         this.buttonsMap = new Map();
         Array.from(Array(12).keys()).forEach(v=>{
           let monthButton = document.createElement('vaadin-button');
           monthButton.addEventListener('click', e => {
-            this.valueDate = new Date(this.renderedYear, v+1, 0)
+            this.dateValue = new Date(this.dateValue.getFullYear(), v+1, 0)
           });
           monthButton.setAttribute("theme","small");
           this.buttonsMap.set(v, monthButton);
         });
       }
 
-      createCalendar(){
+      ready() {
+        super.ready();
+        this.createCalendarDOM();
+        this.initializeProperties();
+      }
+      
+      createCalendarDOM(){
         let currentMonthsRow;
         this.buttonsMap.forEach((value, key) => {
-          value.appendChild(document.createTextNode(this.getLocaleMonthName(key)));
+          value.appendChild(document.createTextNode(this.getLocalizedMonthName(key)));
           if (key%3 == 0){
             currentMonthsRow = document.createElement('div');
             currentMonthsRow.setAttribute("part","months_row");
@@ -141,110 +141,89 @@
         this.$.calendar.appendChild(currentMonthsRow);
       }
 
-      updateValueDateFromValue(){
+      initializeProperties(){
         let momentObject = moment(this.value, "YYYY-MM-DD", true);
         if(this.value && momentObject.isValid()) {
-          this.valueDate = new Date(momentObject.year(), momentObject.month()+1, 0);
-        }
-        else {
-          this.renderedYear = moment().year();
+          this.dateValue = new Date(momentObject.year(), momentObject.month()+1, 0);
+        } else {
+          this.dateValue = new Date();
+          this.value = moment(this.dateValue).format("YYYY-MM-DD"); 
         }
       }
+      
 
       previousMonth(){
-        this.addMonth(-1);
+        this.dateValue = new Date(this.dateValue.getFullYear(), this.dateValue.getMonth(), 0);
       }
 
       nextMonth(){
-        this.addMonth(1);
-      }
-
-      addMonth(monthToAdd) {
-        if(!this.valueDate){
-          let now = new Date();
-          this.valueDate = new Date(now.getFullYear(), now.getMonth(),0);
-        }
-        this.valueDate = new Date(this.valueDate.getFullYear(), this.valueDate.getMonth() + 1 + monthToAdd, 0);
+        this.dateValue = new Date(this.dateValue.getFullYear(), this.dateValue.getMonth() + 2, 0);
       }
 
       previousYear(){
-        this.addYear(-1);
+        this.dateValue = new Date(this.dateValue.getFullYear() - 1, this.dateValue.getMonth() + 1, 0);
       }
 
       nextYear(){
-        this.addYear(1);
+        this.dateValue = new Date(this.dateValue.getFullYear() + 1, this.dateValue.getMonth() + 1, 0);
       }
 
-      addYear(yearToAdd) {
-        if(!this.valueDate){
-          let now = new Date();
-          this.valueDate = new Date(now.getFullYear(), now.getMonth(),0);
-        }
-        this.valueDate = new Date(this.valueDate.getFullYear() + yearToAdd, this.valueDate.getMonth() + 1, 0);
+      
+      getDateAsLocalizedString(){
+        return this.dateValue.toLocaleDateString(this.locale);
       }
 
-      getFormattedDate(){
-        return this.valueDate.toLocaleDateString(this.locale);
-      }
-
-      getLocaleMonthName(monthNum){
+      getLocalizedMonthName(monthNum){
         let monthName = new Date(2000, monthNum, 1).toLocaleDateString(this.locale, {month:'short'});
         return monthName.charAt(0).toUpperCase()+monthName.substring(1);
       }
 
-      updateRenderedDate() {
-        this.renderedDate = this.getFormattedDate();
-      }
-
-      updateRenderedYear(){
-        this.renderedYear = this.valueDate.getFullYear();
-      }
-
-      updateValue(){
-        this.value = moment(this.valueDate).format("YYYY-MM-DD");
-      }
-
-      selectMonthButton(newValue, oldValue){
-        this.buttonsMap.get(newValue.getMonth()).setAttribute("theme", "primary small");
-        if(oldValue && newValue.getMonth() != oldValue.getMonth())
-          this.buttonsMap.get(oldValue.getMonth()).setAttribute("theme", "small");
-      }
-
-      _renderedDateChanged(newValue, oldValue) {
-        if(!this.valueDate || newValue == this.getFormattedDate()){
+      _dateFieldChanged(newValue, oldValue) {
+        if(!this.dateValue || newValue == this.getDateAsLocalizedString()){
           return;
         }
         
         let momentObject = moment(newValue, this.formats[this.locale].toUpperCase(),true);
         if(momentObject.isValid()){
-          this.valueDate = new Date(momentObject.format('Y'),momentObject.format('M'),0);
+          this.dateValue = new Date(momentObject.format('Y'),momentObject.format('M'),0);
         }
       }
 
-      _renderedYearChanged(newValue, oldValue) {
-        if(!this.valueDate || newValue == this.valueDate.getFullYear()){
+      _yearFieldChanged(newValue, oldValue) {
+        if(!this.dateValue || newValue == this.dateValue.getFullYear()){
           return;
         }
         
-        let newDate = new Date(newValue, this.valueDate.getMonth() + 1, 0);
+        let newDate = new Date(newValue, this.dateValue.getMonth() + 1, 0);
         if(newDate.getFullYear() == newValue){
-          this.valueDate = newDate;
+          this.dateValue = newDate;
         }
       }
 
       _valueChanged(newValue, oldValue) {
-        if(newValue == moment(this.valueDate).format("YYYY-MM-DD")){
-          return;
+        if(newValue != oldValue){
+          let momentObject = moment(newValue, "YYYY-MM-DD", true);
+          if(momentObject.isValid()) {
+           this.dateValue = new Date(momentObject.year(), momentObject.month()+1, 0);
+          }
+          else {
+            this.dateValue = new Date();
+            this.value = moment(this.dateValue).format("YYYY-MM-DD"); 
+          }
         }
-        
-        this.updateValueDateFromValue();
       }
 
-      _valueDateChanged(newValue, oldValue){
-          this.updateRenderedDate();
-          this.updateRenderedYear();
-          this.updateValue();
-          this.selectMonthButton(newValue, oldValue);
+      _dateValueChanged(newValue, oldValue){
+          this.dateField = this.getDateAsLocalizedString();
+          this.yearField = this.dateValue.getFullYear();
+          this.value = moment(this.dateValue).format("YYYY-MM-DD");
+          this.changeSelectedButtonStyle(newValue, oldValue);
+      }
+
+      changeSelectedButtonStyle(newValue, oldValue){
+        this.buttonsMap.get(newValue.getMonth()).setAttribute("theme", "primary small");
+        if(oldValue && newValue.getMonth() != oldValue.getMonth())
+          this.buttonsMap.get(oldValue.getMonth()).setAttribute("theme", "small");
       }
 
       static get properties() {
@@ -255,9 +234,9 @@
             observer: '_valueChanged'
           },
 
-          valueDate: {
+          dateValue: {
             type: Date,
-            observer: '_valueDateChanged'
+            observer: '_dateValueChanged'
           },
           
           locale: {
@@ -265,16 +244,14 @@
             value: 'fr-FR'
           },
 
-          renderedDate: {
+          dateField: {
             type: String,
-            observer: '_renderedDateChanged',
-            reflectToAttribute: true
+            observer: '_dateFieldChanged'
           },
 
-          renderedYear: {
+          yearField: {
             type: String,
-            observer: '_renderedYearChanged',
-            reflectToAttribute: true
+            observer: '_yearFieldChanged'
           },
 
           buttonsMap: {
