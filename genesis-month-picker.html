@@ -255,7 +255,8 @@
           value: {
             type: String,
             reflectToAttribute: true,
-            observer: '_valueChanged'
+            observer: '_valueChanged',
+            notify: true
           },
 
           dateValue: {
@@ -267,7 +268,8 @@
             type: String,
             value: 'fr-FR',
             reflectToAttribute: true,
-            observer: '_localeChanged'
+            observer: '_localeChanged',
+            notify: true
           },
 
           dateField: {
