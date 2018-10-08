@@ -213,6 +213,30 @@
         }
       }
 
+      _localeChanged(newValue, oldValue){
+        if(newValue!=oldValue && this.dateField){
+          this.dateField = this.getDateAsLocalizedString();
+          this.buttonsMap.forEach((value, key) => {
+          value.textContent=this.getLocalizedMonthName(key);        
+        });
+        }
+      }
+
+      createCalendarDOM(){
+        let currentMonthsRow;
+        this.buttonsMap.forEach((value, key) => {
+          value.appendChild(document.createTextNode(this.getLocalizedMonthName(key)));
+          if (key%3 == 0){
+            currentMonthsRow = document.createElement('div');
+            currentMonthsRow.setAttribute("part","months_row");
+            this.$.calendar.appendChild(currentMonthsRow);
+          }
+          currentMonthsRow.appendChild(value);
+        });
+        this.$.calendar.appendChild(currentMonthsRow);
+      }
+
+
       _dateValueChanged(newValue, oldValue){
           this.dateField = this.getDateAsLocalizedString();
           this.yearField = this.dateValue.getFullYear();
@@ -241,7 +265,9 @@
           
           locale: {
             type: String,
-            value: 'fr-FR'
+            value: 'fr-FR',
+            reflectToAttribute: true,
+            observer: '_localeChanged'
           },
 
           dateField: {
