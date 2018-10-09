@@ -67,7 +67,20 @@
           assert.equal(dateField.value, '31/01/2019');
           assert.equal(element.value, '2019-01-31');
         });
-
+/*
+        test('Setting no value in the date field should set the backing value to the currentDate', () => {
+          const element = fixture('BasicTestFixture');
+          assert.equal(element.value, '2018-12-31');
+          const dateNow=new Date();
+          const dateNowAsString=new Date(dateNow.getFullYear(), dateNow.getMonth()+1,0);
+          
+          const elementShadowRoot = element.shadowRoot;
+          const dateField = elementShadowRoot.querySelector('#dateField');
+          dateField.value = '';
+       //   assert.equal(dateField.value, '');
+          assert.equal(element.value, dateNowAsString);
+        });
+*/
 
         // Create a test fixture
       /*    const element = fixture('ChangedPropertyTestFixture');
