@@ -189,18 +189,7 @@
         }
       }
 
-      _yearFieldChanged(newValue, oldValue) {
-        if(!this.dateValue || newValue == this.dateValue.getFullYear()){
-          return;
-        }
-        
-        let newDate = new Date(newValue, this.dateValue.getMonth() + 1, 0);
-        if(newDate.getFullYear() == newValue){
-          this.dateValue = newDate;
-        }
-      }
-
-      _valueChanged(newValue, oldValue) {
+     _valueChanged(newValue, oldValue) {
         if(newValue != oldValue){
           let momentObject = moment(newValue, "YYYY-MM-DD", true);
           if(momentObject.isValid()) {
@@ -212,6 +201,19 @@
           }
         }
       }
+      
+      _yearFieldChanged(newValue, oldValue) {
+        if(!this.dateValue || newValue == this.dateValue.getFullYear()){
+          return;
+        }
+        
+        let newDate = new Date(newValue, this.dateValue.getMonth() + 1, 0);
+        if(newDate.getFullYear() == newValue){
+          this.dateValue = newDate;
+        }
+      }
+
+ 
 
       _localeChanged(newValue, oldValue){
         if(newValue!=oldValue && this.dateField){

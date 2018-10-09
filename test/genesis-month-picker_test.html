@@ -15,9 +15,15 @@
 
     <test-fixture id="BasicTestFixture">
       <template>
-        <genesis-month-picker></genesis-month-picker>
+        <genesis-month-picker value="2018-12-20"></genesis-month-picker>
       </template>
     </test-fixture>
+
+    <test-fixture id="LocaleTestFixture">
+        <template>
+          <genesis-month-picker value="2018-12-20" locale="en-US"></genesis-month-picker>
+        </template>
+      </test-fixture>
 
     <test-fixture id="ChangedPropertyTestFixture">
       <template>
@@ -28,23 +34,50 @@
     <script>
       suite('genesis-month-picker', () => {
 
-        test('instantiating the element with default properties works', () => {
+        test('the date of the Genesis Month Picker should be positionned to end of month', () => {
           const element = fixture('BasicTestFixture');
-          assert.equal(element.prop1, 'genesis-month-picker');
-          const elementShadowRoot = element.shadowRoot;
-          const elementHeader = elementShadowRoot.querySelector('h2');
-          assert.equal(elementHeader.innerHTML, 'Hello genesis-month-picker!');
+          assert.equal(element.value, '2018-12-31');
         });
 
-        test('setting a property on the element works', () => {
-          // Create a test fixture
-          const element = fixture('ChangedPropertyTestFixture');
+        test('the default locale of the Genesis Month Picker should be french', () => {
+          const element = fixture('BasicTestFixture');
+          assert.equal(element.value, '2018-12-31');
+
+          const elementShadowRoot = element.shadowRoot;
+          const dateField = elementShadowRoot.querySelector('#dateField');
+          assert.equal(dateField.value, '31/12/2018');
+        });
+
+        test('the local prop should override the default locale', () => {
+          const element = fixture('LocaleTestFixture');
+          assert.equal(element.value, '2018-12-31');
+
+          const elementShadowRoot = element.shadowRoot;
+          const dateField = elementShadowRoot.querySelector('#dateField');
+          assert.equal(dateField.value, '12/31/2018');
+        });
+
+        test('Changing the date field should be reflected on the date value ', () => {
+          const element = fixture('BasicTestFixture');
+          assert.equal(element.value, '2018-12-31');
+
+          const elementShadowRoot = element.shadowRoot;
+          const dateField = elementShadowRoot.querySelector('#dateField');
+          dateField.value = '04/01/2019';
+          assert.equal(dateField.value, '31/01/2019');
+          assert.equal(element.value, '2019-01-31');
+        });
+
+
+        // Create a test fixture
+      /*    const element = fixture('ChangedPropertyTestFixture');
           assert.equal(element.prop1, 'new-prop1');
           const elementShadowRoot = element.shadowRoot;
-          const elementHeader = elementShadowRoot.querySelector('h2');
-          assert.equal(elementHeader.innerHTML, 'Hello new-prop1!');
-        });
-
+          const dateField = elementShadowRoot.querySelector('h2');
+          assert.equal(dateField.innerHTML, 'Hello new-prop1!');
+        });test('setting a property on the element works', () => {
+        
+*/
       });
     </script>
 
