@@ -10,6 +10,8 @@
     <script src="../../web-component-tester/browser.js"></script>
 
     <link rel="import" href="../genesis-month-picker.html">
+    
+    <script src="../bower_components/moment/min/moment.min.js"></script>
   </head>
   <body>
 
@@ -34,12 +36,12 @@
     <script>
       suite('genesis-month-picker', () => {
 
-        test('the date of the Genesis Month Picker should be positionned to end of month', () => {
+        test('The date of the Genesis Month Picker should be positionned to end of month', () => {
           const element = fixture('BasicTestFixture');
           assert.equal(element.value, '2018-12-31');
         });
 
-        test('the default locale of the Genesis Month Picker should be french', () => {
+        test('The default locale of the Genesis Month Picker should be french', () => {
           const element = fixture('BasicTestFixture');
           assert.equal(element.value, '2018-12-31');
 
@@ -48,7 +50,7 @@
           assert.equal(dateField.value, '31/12/2018');
         });
 
-        test('the local prop should override the default locale', () => {
+        test('The local prop should override the default locale', () => {
           const element = fixture('LocaleTestFixture');
           assert.equal(element.value, '2018-12-31');
 
@@ -63,24 +65,28 @@
 
           const elementShadowRoot = element.shadowRoot;
           const dateField = elementShadowRoot.querySelector('#dateField');
+          dateField.focus();
           dateField.value = '04/01/2019';
+          dateField.blur();
           assert.equal(dateField.value, '31/01/2019');
           assert.equal(element.value, '2019-01-31');
         });
-/*
-        test('Setting no value in the date field should set the backing value to the currentDate', () => {
+
+        test('Setting no value in the date field should set the backing value to null', () => {
           const element = fixture('BasicTestFixture');
           assert.equal(element.value, '2018-12-31');
           const dateNow=new Date();
-          const dateNowAsString=new Date(dateNow.getFullYear(), dateNow.getMonth()+1,0);
-          
+          const dateEndOfMonth=new Date(dateNow.getFullYear(), dateNow.getMonth()+1,0);
+
           const elementShadowRoot = element.shadowRoot;
           const dateField = elementShadowRoot.querySelector('#dateField');
+          dateField.focus();
           dateField.value = '';
-       //   assert.equal(dateField.value, '');
-          assert.equal(element.value, dateNowAsString);
+          dateField.blur();
+          assert.equal(dateField.value, '');
+          assert.equal(element.value, null);
         });
-*/
+
 
         // Create a test fixture
       /*    const element = fixture('ChangedPropertyTestFixture');

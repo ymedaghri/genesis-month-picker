@@ -68,7 +68,7 @@
     <div id="month-picker">
       <genesis-popover placement="bottom-start" id="popOver">
           <span>
-            <vaadin-text-field id="dateField" placeholder="Date" locale="[[locale]]" value="{{dateField}}"> <!-- prevent-invalid-input pattern="\d*/*\d*/*\d*/*" -->
+            <vaadin-text-field id="dateField" placeholder="Date" locale="[[locale]]" value="{{dateField}}" on-blur="checkFieldValid"> <!-- prevent-invalid-input pattern="\d*/*\d*/*\d*/*" -->
               <iron-icon icon="vaadin:calendar" slot="suffix"></iron-icon><!--on-click="update"--> 
             </vaadin-text-field>
           </span>
@@ -76,7 +76,7 @@
               <div part="column-slot">
                   <div part="year-field">
                       <iron-icon icon="vaadin:caret-left" on-click="previousYear"></iron-icon>
-                      <vaadin-text-field id="yearField" prevent-invalid-input pattern="\d*" value="{{yearField}}" theme="align-center"></vaadin-text-field>
+                      <vaadin-text-field id="yearField" prevent-invalid-input pattern="\d*" value="{{yearField}}" theme="align-center" on-blur="checkYearFieldValid"></vaadin-text-field>
                       <iron-icon icon="vaadin:caret-right" on-click="nextYear"></iron-icon>
                   </div>
                   <div id="calendar"></div>
@@ -103,22 +103,10 @@
      Polymer.Element {
 
       static get is() { return 'genesis-month-picker'; }
-      
+  
       constructor(){
         super();
         this.initAndStoreButtonsMap();
-      }
-
-      initAndStoreButtonsMap(){  
-        this.buttonsMap = new Map();
-        Array.from(Array(12).keys()).forEach(v=>{
-          let monthButton = document.createElement('vaadin-button');
-          monthButton.addEventListener('click', e => {
-            this.dateValue = new Date(this.dateValue.getFullYear(), v+1, 0)
-          });
-          monthButton.setAttribute("theme","small");
-          this.buttonsMap.set(v, monthButton);
-        });
       }
 
       ready() {
@@ -126,11 +114,25 @@
         this.createCalendarDOM();
         this.initializeProperties();
       }
+
+      initAndStoreButtonsMap(){  
+        this.buttonsMap = new Map();
+        Array.from(Array(12).keys()).forEach(v=>{
+          let monthButton = document.createElement('vaadin-button');
+          monthButton.addEventListener('click', e => {
+            this.dateValue = new Date(this.yearField, v+1, 0)
+          });
+          monthButton.addEventListener('dblclick', e => {
+            this.$.popOver.togglePopper();
+          });
+          monthButton.setAttribute("theme","small");
+          this.buttonsMap.set(v, monthButton);
+        });
+      }
       
       createCalendarDOM(){
         let currentMonthsRow;
         this.buttonsMap.forEach((value, key) => {
-          value.appendChild(document.createTextNode(this.getLocalizedMonthName(key)));
           if (key%3 == 0){
             currentMonthsRow = document.createElement('div');
             currentMonthsRow.setAttribute("part","months_row");
@@ -146,30 +148,119 @@
         if(this.value && momentObject.isValid()) {
           this.dateValue = new Date(momentObject.year(), momentObject.month()+1, 0);
         } else {
-          this.dateValue = new Date();
-          this.value = moment(this.dateValue).format("YYYY-MM-DD"); 
+          this.dateValue = null;
         }
       }
-      
+
+      checkYearFieldValid(){
+        if(!this.yearField)
+        {
+          this.yearField=new Date().getFullYear();
+        } else {
+          if(this.dateValue!=null){
+            this.dateValue = new Date(this.yearField, this.dateValue.getMonth() + 1, 0);
+          }
+        }
+      }
+
+      checkFieldValid() {
+        if(this.dateField){
+          let momentObject = moment(this.dateField, this.formats[this.locale].toUpperCase(),true);
+           if(!momentObject.isValid())
+           {
+             this.dateValue=null;
+              this.dateField='';
+          } else {
+            this.dateValue=this.toEndOfMonth(momentObject);
+          }
+        } else {
+          this.dateValue=null;
+        }
+      }
+
+      toEndOfMonth(moment)
+      {
+        return new Date(moment.format('Y'),moment.format('M'),0);
+      }
 
       previousMonth(){
-        this.dateValue = new Date(this.dateValue.getFullYear(), this.dateValue.getMonth(), 0);
+        if(this.dateValue!=null) {
+          this.dateValue = new Date(this.dateValue.getFullYear(), this.dateValue.getMonth(), 0);
+        }
       }
 
       nextMonth(){
-        this.dateValue = new Date(this.dateValue.getFullYear(), this.dateValue.getMonth() + 2, 0);
+        if(this.dateValue!=null) {
+          this.dateValue = new Date(this.dateValue.getFullYear(), this.dateValue.getMonth() + 2, 0);
+        }
       }
 
       previousYear(){
-        this.dateValue = new Date(this.dateValue.getFullYear() - 1, this.dateValue.getMonth() + 1, 0);
+        if(this.dateValue!=null){
+          this.dateValue = new Date(this.dateValue.getFullYear() - 1, this.dateValue.getMonth() + 1, 0);
+        } else {
+          this.yearField--;
+        }
       }
 
       nextYear(){
-        this.dateValue = new Date(this.dateValue.getFullYear() + 1, this.dateValue.getMonth() + 1, 0);
+        if(this.dateValue!=null){
+          this.dateValue = new Date(this.dateValue.getFullYear() + 1, this.dateValue.getMonth() + 1, 0);
+        } else {
+          this.yearField++;
+        }
+      }
+
+      _localeChanged(newValue, oldValue){
+        if(newValue!=oldValue){
+          this.dateField = this.getDateAsLocalizedString();
+          this.buttonsMap.forEach((value, key) => {
+          value.textContent=this.getLocalizedMonthName(key);        
+        });
+        }
+      }
+
+      _valueChanged(newValue, oldValue) {
+          if(newValue==null){
+            this.dateValue = null;
+            return;
+          }
+
+          let momentObject = moment(newValue, "YYYY-MM-DD", true);
+          if(momentObject.isValid()) {
+            this.dateValue = new Date(momentObject.year(), momentObject.month()+1, 0);
+          }
+      }
+
+      _dateValueChanged(newValue, oldValue){
+        if(newValue){
+          this.dateField = this.getDateAsLocalizedString();
+          this.yearField = this.dateValue.getFullYear();
+          this.value = moment(this.dateValue).format("YYYY-MM-DD");
+        } else {
+          this.dateField='';
+          this.value=null;
+          this.yearField=new Date().getFullYear();
+        }
+        this.changeSelectedButtonStyle(newValue, oldValue);
+      }
+
+      changeSelectedButtonStyle(newValue, oldValue){
+        if(oldValue){
+          this.buttonsMap.get(oldValue.getMonth()).setAttribute("theme", "small");
+        }
+
+        if(newValue){
+          this.buttonsMap.get(newValue.getMonth()).setAttribute("theme", "primary small");
+        }
       }
 
       
+
       getDateAsLocalizedString(){
+        if(this.dateValue==null) {
+          return '';
+        }
         return this.dateValue.toLocaleDateString(this.locale);
       }
 
@@ -178,80 +269,7 @@
         return monthName.charAt(0).toUpperCase()+monthName.substring(1);
       }
 
-      _dateFieldChanged(newValue, oldValue) {
-        if(!this.dateValue || newValue == this.getDateAsLocalizedString()){
-          return;
-        }
-        
-        let momentObject = moment(newValue, this.formats[this.locale].toUpperCase(),true);
-        if(momentObject.isValid()){
-          this.dateValue = new Date(momentObject.format('Y'),momentObject.format('M'),0);
-        }
-      }
-
-     _valueChanged(newValue, oldValue) {
-        if(newValue != oldValue){
-          let momentObject = moment(newValue, "YYYY-MM-DD", true);
-          if(momentObject.isValid()) {
-           this.dateValue = new Date(momentObject.year(), momentObject.month()+1, 0);
-          }
-          else {
-            this.dateValue = new Date();
-            this.value = moment(this.dateValue).format("YYYY-MM-DD"); 
-          }
-        }
-      }
-      
-      _yearFieldChanged(newValue, oldValue) {
-        if(!this.dateValue || newValue == this.dateValue.getFullYear()){
-          return;
-        }
-        
-        let newDate = new Date(newValue, this.dateValue.getMonth() + 1, 0);
-        if(newDate.getFullYear() == newValue){
-          this.dateValue = newDate;
-        }
-      }
-
- 
-
-      _localeChanged(newValue, oldValue){
-        if(newValue!=oldValue && this.dateField){
-          this.dateField = this.getDateAsLocalizedString();
-          this.buttonsMap.forEach((value, key) => {
-          value.textContent=this.getLocalizedMonthName(key);        
-        });
-        }
-      }
-
-      createCalendarDOM(){
-        let currentMonthsRow;
-        this.buttonsMap.forEach((value, key) => {
-          value.appendChild(document.createTextNode(this.getLocalizedMonthName(key)));
-          if (key%3 == 0){
-            currentMonthsRow = document.createElement('div');
-            currentMonthsRow.setAttribute("part","months_row");
-            this.$.calendar.appendChild(currentMonthsRow);
-          }
-          currentMonthsRow.appendChild(value);
-        });
-        this.$.calendar.appendChild(currentMonthsRow);
-      }
-
-
-      _dateValueChanged(newValue, oldValue){
-          this.dateField = this.getDateAsLocalizedString();
-          this.yearField = this.dateValue.getFullYear();
-          this.value = moment(this.dateValue).format("YYYY-MM-DD");
-          this.changeSelectedButtonStyle(newValue, oldValue);
-      }
-
-      changeSelectedButtonStyle(newValue, oldValue){
-        this.buttonsMap.get(newValue.getMonth()).setAttribute("theme", "primary small");
-        if(oldValue && newValue.getMonth() != oldValue.getMonth())
-          this.buttonsMap.get(oldValue.getMonth()).setAttribute("theme", "small");
-      }
-
+    
       static get properties() {
         return {
           value: {
@@ -275,13 +293,11 @@
           },
 
           dateField: {
-            type: String,
-            observer: '_dateFieldChanged'
+            type: String
           },
 
           yearField: {
-            type: String,
-            observer: '_yearFieldChanged'
+            type: String
           },
 
           buttonsMap: {

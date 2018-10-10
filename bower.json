@@ -13,7 +13,7 @@
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0",
-    "genesis-popover": "ymedaghri/genesis-popover#^1.0.5",
+    "genesis-popover": "bisam-rd/genesis-popover#^1.2.1",
     "vaadin-lumo-styles": "vaadin/vaadin-lumo-styles#^1.2.0",
     "vaadin-text-field": "vaadin/vaadin-text-field#^2.1.2",
     "vaadin-button": "vaadin/vaadin-button#^2.1.0",
