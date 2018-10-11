@@ -112,7 +112,6 @@
       ready() {
         super.ready();
         this.createCalendarDOM();
-        this.initializeProperties();
       }
 
       initAndStoreButtonsMap(){  
@@ -120,7 +119,7 @@
         Array.from(Array(12).keys()).forEach(v=>{
           let monthButton = document.createElement('vaadin-button');
           monthButton.addEventListener('click', e => {
-            this.dateValue = new Date(this.yearField, v+1, 0)
+            this.internalDateValue = new Date(this.yearField, v+1, 0)
           });
           monthButton.addEventListener('dblclick', e => {
             this.$.popOver.togglePopper();
@@ -143,22 +142,13 @@
         this.$.calendar.appendChild(currentMonthsRow);
       }
 
-      initializeProperties(){
-        let momentObject = moment(this.value, "YYYY-MM-DD", true);
-        if(this.value && momentObject.isValid()) {
-          this.dateValue = new Date(momentObject.year(), momentObject.month()+1, 0);
-        } else {
-          this.dateValue = null;
-        }
-      }
-
       checkYearFieldValid(){
         if(!this.yearField)
         {
           this.yearField=new Date().getFullYear();
         } else {
-          if(this.dateValue!=null){
-            this.dateValue = new Date(this.yearField, this.dateValue.getMonth() + 1, 0);
+          if(this.internalDateValue!=null){
+            this.internalDateValue = new Date(this.yearField, this.internalDateValue.getMonth() + 1, 0);
           }
         }
       }
@@ -168,13 +158,13 @@
           let momentObject = moment(this.dateField, this.formats[this.locale].toUpperCase(),true);
            if(!momentObject.isValid())
            {
-             this.dateValue=null;
+             this.internalDateValue=null;
               this.dateField='';
           } else {
-            this.dateValue=this.toEndOfMonth(momentObject);
+            this.internalDateValue=this.toEndOfMonth(momentObject);
           }
         } else {
-          this.dateValue=null;
+          this.internalDateValue=null;
         }
       }
 
@@ -184,41 +174,48 @@
       }
 
       previousMonth(){
-        if(this.dateValue!=null) {
-          this.dateValue = new Date(this.dateValue.getFullYear(), this.dateValue.getMonth(), 0);
+        if(this.internalDateValue!=null) {
+          this.internalDateValue = new Date(this.internalDateValue.getFullYear(), this.internalDateValue.getMonth(), 0);
         }
       }
 
       nextMonth(){
-        if(this.dateValue!=null) {
-          this.dateValue = new Date(this.dateValue.getFullYear(), this.dateValue.getMonth() + 2, 0);
+        if(this.internalDateValue!=null) {
+          this.internalDateValue = new Date(this.internalDateValue.getFullYear(), this.internalDateValue.getMonth() + 2, 0);
         }
       }
 
       previousYear(){
-        if(this.dateValue!=null){
-          this.dateValue = new Date(this.dateValue.getFullYear() - 1, this.dateValue.getMonth() + 1, 0);
+        if(this.internalDateValue!=null){
+          this.internalDateValue = new Date(this.internalDateValue.getFullYear() - 1, this.internalDateValue.getMonth() + 1, 0);
         } else {
           this.yearField--;
         }
       }
 
       nextYear(){
-        if(this.dateValue!=null){
-          this.dateValue = new Date(this.dateValue.getFullYear() + 1, this.dateValue.getMonth() + 1, 0);
+        if(this.internalDateValue!=null){
+          this.internalDateValue = new Date(this.internalDateValue.getFullYear() + 1, this.internalDateValue.getMonth() + 1, 0);
         } else {
           this.yearField++;
         }
       }
 
-      _dateValueChanged(newValue, oldValue){
+      setDateValue(valueAsString){
+        let momentObject = moment(valueAsString, "YYYY-MM-DD", true);
+        if(valueAsString && momentObject.isValid()) {
+          this.internalDateValue = new Date(momentObject.year(), momentObject.month()+1, 0);
+        } else {
+          this.internalDateValue = null;
+        }
+      }
+
+      __internalDateValueChanged(newValue, oldValue){
         if(newValue){
           this.dateField = this.getDateAsLocalizedString();
-          this.yearField = this.dateValue.getFullYear();
-          this.value = moment(this.dateValue).format("YYYY-MM-DD");
+          this.yearField = this.internalDateValue.getFullYear();
         } else {
           this.dateField='';
-          this.value=null;
           this.yearField=new Date().getFullYear();
         }
         this.changeSelectedButtonStyle(newValue, oldValue);
@@ -233,18 +230,6 @@
         }
       }
 
-      __valueChanged(newValue, oldValue) {
-          if(newValue==null){
-            this.dateValue = null;
-            return;
-          }
-
-          let momentObject = moment(newValue, "YYYY-MM-DD", true);
-          if(momentObject.isValid()) {
-            this.dateValue = new Date(momentObject.year(), momentObject.month()+1, 0);
-          }
-      }
-
       changeSelectedButtonStyle(newValue, oldValue){
         if(oldValue){
           this.buttonsMap.get(oldValue.getMonth()).setAttribute("theme", "small");
@@ -256,10 +241,10 @@
       }  
 
       getDateAsLocalizedString(){
-        if(this.dateValue==null) {
+        if(this.internalDateValue==null) {
           return '';
         }
-        return this.dateValue.toLocaleDateString(this.locale);
+        return this.internalDateValue.toLocaleDateString(this.locale);
       }
 
       getLocalizedMonthName(monthNum){
@@ -270,14 +255,15 @@
       static get properties() {
         return {
           dateValue: {
-            type: Date,
-            observer: '_dateValueChanged'
-          },
-
-          dateMillis: {
-            type: Number,
-            computed: 'computeDateToMillis(dateValue)',
+            type: String,
+            computed: 'convertDate(internalDateValue)',
             notify: true
+          },
+          
+          internalDateValue: {
+            type: Date,
+            observer: '__internalDateValueChanged',
+            value: null
           },
 
           locale: {
@@ -287,13 +273,6 @@
             observer: '_localeChanged',
             notify: true
           },
-
-          value: {
-            type: String,
-            reflectToAttribute: true,
-            observer: '__valueChanged'
-          },
-
           
           dateField: {
             type: String
@@ -526,11 +505,11 @@
         }
       }
 
-        computeDateToMillis(date) {
+        convertDate(date) {
           if(date===null) {
             return null;
           }
-             return date.getTime();
+             return moment(date).format("YYYY-MM-DD");
           }
     }
 
