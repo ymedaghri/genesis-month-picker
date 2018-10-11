@@ -1,7 +1,7 @@
 {
   "name": "genesis-month-picker",
   "description": "The Genesis Month Picker is a component that allow to navigate quickly between months to select an end month date.",
-  "homepage": "https://github.com/bisam-rd/genesis-month-picker.git",
+  "homepage": "https://github.com/ymedaghri/genesis-month-picker.git",
   "main": "genesis-month-picker.html",
   "license": "MIT",
   "ignore": [
