@@ -211,27 +211,6 @@
         }
       }
 
-      _localeChanged(newValue, oldValue){
-        if(newValue!=oldValue){
-          this.dateField = this.getDateAsLocalizedString();
-          this.buttonsMap.forEach((value, key) => {
-          value.textContent=this.getLocalizedMonthName(key);        
-        });
-        }
-      }
-
-      _valueChanged(newValue, oldValue) {
-          if(newValue==null){
-            this.dateValue = null;
-            return;
-          }
-
-          let momentObject = moment(newValue, "YYYY-MM-DD", true);
-          if(momentObject.isValid()) {
-            this.dateValue = new Date(momentObject.year(), momentObject.month()+1, 0);
-          }
-      }
-
       _dateValueChanged(newValue, oldValue){
         if(newValue){
           this.dateField = this.getDateAsLocalizedString();
@@ -245,6 +224,27 @@
         this.changeSelectedButtonStyle(newValue, oldValue);
       }
 
+      _localeChanged(newValue, oldValue){
+        if(newValue!=oldValue){
+          this.dateField = this.getDateAsLocalizedString();
+          this.buttonsMap.forEach((value, key) => {
+          value.textContent=this.getLocalizedMonthName(key);        
+        });
+        }
+      }
+
+      __valueChanged(newValue, oldValue) {
+          if(newValue==null){
+            this.dateValue = null;
+            return;
+          }
+
+          let momentObject = moment(newValue, "YYYY-MM-DD", true);
+          if(momentObject.isValid()) {
+            this.dateValue = new Date(momentObject.year(), momentObject.month()+1, 0);
+          }
+      }
+
       changeSelectedButtonStyle(newValue, oldValue){
         if(oldValue){
           this.buttonsMap.get(oldValue.getMonth()).setAttribute("theme", "small");
@@ -253,9 +253,7 @@
         if(newValue){
           this.buttonsMap.get(newValue.getMonth()).setAttribute("theme", "primary small");
         }
-      }
-
-      
+      }  
 
       getDateAsLocalizedString(){
         if(this.dateValue==null) {
@@ -268,23 +266,20 @@
         let monthName = new Date(2000, monthNum, 1).toLocaleDateString(this.locale, {month:'short'});
         return monthName.charAt(0).toUpperCase()+monthName.substring(1);
       }
-
     
       static get properties() {
         return {
-          value: {
-            type: String,
-            reflectToAttribute: true,
-            observer: '_valueChanged',
+          dateValue: {
+            type: Date,
+            observer: '_dateValueChanged'
+          },
+
+          dateMillis: {
+            type: Number,
+            computed: 'computeDateToMillis(dateValue)',
             notify: true
           },
 
-          dateValue: {
-            type: Date,
-            observer: '_dateValueChanged',
-            notify: true
-          },
-          
           locale: {
             type: String,
             value: 'fr-FR',
@@ -293,6 +288,13 @@
             notify: true
           },
 
+          value: {
+            type: String,
+            reflectToAttribute: true,
+            observer: '__valueChanged'
+          },
+
+          
           dateField: {
             type: String
           },
@@ -521,8 +523,15 @@
               "es-US" : "M/d/yyyy"
             }
           }
-        };
+        }
       }
+
+        computeDateToMillis(date) {
+          if(date===null) {
+            return null;
+          }
+             return date.getTime();
+          }
     }
 
     window.customElements.define(GenesisMonthPicker.is, GenesisMonthPicker);
