@@ -87,16 +87,21 @@
           assert.equal(element.value, null);
         });
 
-
-        // Create a test fixture
-      /*    const element = fixture('ChangedPropertyTestFixture');
-          assert.equal(element.prop1, 'new-prop1');
-          const elementShadowRoot = element.shadowRoot;
-          const dateField = elementShadowRoot.querySelector('h2');
-          assert.equal(dateField.innerHTML, 'Hello new-prop1!');
-        });test('setting a property on the element works', () => {
         
-*/
+
+        test('Setting the date value not to end of month should set the date field to end of month and readjust the value to end of month', () => {
+          const element = fixture('BasicTestFixture');
+          assert.equal(element.value, '2018-12-31');
+          element.value = "2018-03-03";
+          
+          const elementShadowRoot = element.shadowRoot;
+          const dateField = elementShadowRoot.querySelector('#dateField');
+
+          assert.equal(dateField.value, '31/03/2018');
+          assert.equal(element.value, '2018-03-31');
+        });
+
+      
       });
     </script>
 
