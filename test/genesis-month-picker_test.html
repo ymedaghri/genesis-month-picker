@@ -15,13 +15,13 @@
   </head>
   <body>
 
-    <test-fixture id="BasicTestFixture">
+    <test-fixture id="FrenchTestFixture">
       <template>
         <genesis-month-picker></genesis-month-picker>
       </template>
     </test-fixture>
 
-    <test-fixture id="LocaleTestFixture">
+    <test-fixture id="LocaleUSTestFixture">
         <template>
           <genesis-month-picker locale="en-US"></genesis-month-picker>
         </template>
@@ -31,77 +31,216 @@
       suite('genesis-month-picker', () => {
 
         test('The date of the Genesis Month Picker should be positionned to end of month', () => {
-          const element = fixture('BasicTestFixture');
-          element.setDateValue('2018-12-20');
-          assert.equal(element.dateValue, '2018-12-31');
+          const element = fixture('FrenchTestFixture');
+          
+          //GIVEN
+          element.date_value='2018-12-20';
+          
+          //THEN
+          assert.equal(element.date_value, '2018-12-31');
         });
 
         test('The default locale of the Genesis Month Picker should be french', () => {
-          const element = fixture('BasicTestFixture');
-          element.setDateValue('2018-12-20');
-          assert.equal(element.dateValue, '2018-12-31');
-
-          const elementShadowRoot = element.shadowRoot;
-          const dateField = elementShadowRoot.querySelector('#dateField');
-          assert.equal(dateField.value, '31/12/2018');
+          const element = fixture('FrenchTestFixture');
+          
+          //GIVEN
+          element.date_value='2018-12-20';
+          
+          //THEN
+          assert.equal(element.date_value, '2018-12-31');
+          assert.equal(element.dateField, '31/12/2018');
         });
 
         test('The local prop should override the default locale', () => {
-          const element = fixture('LocaleTestFixture');
-          element.setDateValue('2018-12-20');
-          assert.equal(element.dateValue, '2018-12-31');
-
-          const elementShadowRoot = element.shadowRoot;
-          const dateField = elementShadowRoot.querySelector('#dateField');
-          assert.equal(dateField.value, '12/31/2018');
+          const element = fixture('LocaleUSTestFixture');
+          
+          //GIVEN
+          element.date_value='2018-12-20';
+          
+          //THEN
+          assert.equal(element.date_value, '2018-12-31');
+          assert.equal(element.dateField, '12/31/2018');
         });
 
         test('Changing the date field should be reflected on the date value ', () => {
-          const element = fixture('BasicTestFixture');
-          element.setDateValue('2018-12-20');
-          assert.equal(element.dateValue, '2018-12-31');
-
+          const element = fixture('FrenchTestFixture');
+          Polymer.dom.flush();
           const elementShadowRoot = element.shadowRoot;
           const dateField = elementShadowRoot.querySelector('#dateField');
+          
+          //GIVEN
+          element.date_value='2018-12-20';
+          
+          //WHEN          
           dateField.focus();
           dateField.value = '04/01/2019';
-          dateField.blur();
+          dateField.blur();   
+
+          //THEN
           assert.equal(dateField.value, '31/01/2019');
-          assert.equal(element.dateValue, '2019-01-31');
+          assert.equal(element.date_value, '2019-01-31');
         });
 
         test('Setting no value in the date field should set the backing value to null', () => {
-          const element = fixture('BasicTestFixture');
-          element.setDateValue('2018-12-20');
-          assert.equal(element.dateValue, '2018-12-31');
-          const dateNow=new Date();
-          const dateEndOfMonth=new Date(dateNow.getFullYear(), dateNow.getMonth()+1,0);
-
+          const element = fixture('FrenchTestFixture');
+          Polymer.dom.flush();
           const elementShadowRoot = element.shadowRoot;
           const dateField = elementShadowRoot.querySelector('#dateField');
+          
+          //GIVEN
+          element.date_value='2018-12-20';
+          
+          //WHEN
           dateField.focus();
           dateField.value = '';
           dateField.blur();
+          
+          //THEN
           assert.equal(dateField.value, '');
-          assert.equal(element.dateValue, null);
+          assert.equal(element.date_value, null);
+        });
+
+        test('Setting the date value not to end of month should set the date field to end of month and readjust the value to end of month', () => {
+          const element = fixture('FrenchTestFixture');
+          Polymer.dom.flush();
+          const elementShadowRoot = element.shadowRoot;
+          const dateField = elementShadowRoot.querySelector('#dateField');
+          
+          //GIVEN
+          element.date_value='2018-12-20';
+
+          //WHEN          
+          dateField.focus();
+          dateField.value = '03/03/2018';
+          dateField.blur();
+
+          //THEN
+          assert.equal(dateField.value, '31/03/2018');
+          assert.equal(element.date_value, '2018-03-31');
+        });
+
+        test('Setting the date field before the min supported year should be adjusted to 31/01/1900', () => {
+          const element = fixture('FrenchTestFixture');
+          Polymer.dom.flush();
+          const elementShadowRoot = element.shadowRoot;
+          const dateField = elementShadowRoot.querySelector('#dateField');
+          
+          //GIVEN
+          element.date_value='2018-12-20';
+          
+          //WHEN
+          dateField.focus();
+          dateField.value = '14/07/1789';
+          dateField.blur();
+          
+          //THEN
+          assert.equal(dateField.value, '31/01/1900');
+          assert.equal(element.date_value, '1900-01-31');
+
+          //WHEN
+          dateField.focus();
+          dateField.value = '31/12/1899';
+          dateField.blur();
+
+          //THEN          
+          assert.equal(dateField.value, '31/01/1900');
+          assert.equal(element.date_value, '1900-01-31');
+
+          //WHEN          
+          dateField.focus();
+          dateField.value = '01/01/1900';
+          dateField.blur();
+          
+          //THEN
+          assert.equal(dateField.value, '31/01/1900');
+          assert.equal(element.date_value, '1900-01-31');
+
+        });
+
+        test('Setting the date field after the max supported year should be adjusted to 31/12/2199', () => {
+          const element = fixture('FrenchTestFixture');
+          Polymer.dom.flush();
+          const elementShadowRoot = element.shadowRoot;
+          const dateField = elementShadowRoot.querySelector('#dateField');
+          
+          //GIVEN
+          element.date_value='2018-12-20';
+          
+          //WHEN
+          dateField.focus();
+          dateField.value = '20/02/4000';
+          dateField.blur();
+          
+          //THEN
+          assert.equal(dateField.value, '31/12/2199');
+          assert.equal(element.date_value, '2199-12-31');
+
+          //WHEN
+          dateField.focus();
+          dateField.value = '01/01/2200';
+          dateField.blur();
+          
+          //THEN
+          assert.equal(dateField.value, '31/12/2199');
+          assert.equal(element.date_value, '2199-12-31');
+
+          //WHEN
+          dateField.focus();
+          dateField.value = '31/12/2199';
+          dateField.blur();
+
+          //THEN
+          assert.equal(dateField.value, '31/12/2199');
+          assert.equal(element.date_value, '2199-12-31');
+        });
+      
+        test('Clicking on previous year is effective only when the year is greater than the min supported year', () => {
+          const element = fixture('FrenchTestFixture');
+          Polymer.dom.flush();
+          const elementShadowRoot = element.shadowRoot;
+          const dateField = elementShadowRoot.querySelector('#dateField');
+          const yearField = elementShadowRoot.querySelector('#yearField');
+          const previousYearIcon = elementShadowRoot.querySelector('#previousYearIcon');
+          
+          //GIVEN
+          element.date_value='1901-05-20';
+          
+          //WHEN
+          previousYearIcon.click();
+          
+          //THEN
+          assert.equal(yearField.value, '1900');
+          assert.equal(dateField.value, '31/05/1900');
+
+          //WHEN
+          previousYearIcon.click();
+
+          //THEN
+          assert.equal(yearField.value, '1900');
+          assert.equal(dateField.value, '31/05/1900');
+        });
+
+        test('Clicking on next year is effective only when the year is lower than the max supported year', () => {
+          const element = fixture('FrenchTestFixture');
+          Polymer.dom.flush();
+          const elementShadowRoot = element.shadowRoot;
+          const yearField = elementShadowRoot.querySelector('#yearField');
+          const dateField = elementShadowRoot.querySelector('#dateField');
+          const nextYearIcon = elementShadowRoot.querySelector('#nextYearIcon');
+          
+          //GIVEN
+          element.date_value='2198-05-20';
+          
+          //WHEN
+          nextYearIcon.click();
+
+          //THEN
+          assert.equal(yearField.value, '2199');
+          assert.equal(dateField.value, '31/05/2199');
+          assert.equal(element.date_value, '2199-05-31');
         });
 
         
-
-        test('Setting the date value not to end of month should set the date field to end of month and readjust the value to end of month', () => {
-          const element = fixture('BasicTestFixture');
-          element.setDateValue('2018-12-20');
-          assert.equal(element.dateValue, '2018-12-31');
-          element.setDateValue('2018-03-03');
-          
-          const elementShadowRoot = element.shadowRoot;
-          const dateField = elementShadowRoot.querySelector('#dateField');
-
-          assert.equal(dateField.value, '31/03/2018');
-          assert.equal(element.dateValue, '2018-03-31');
-        });
-
-      
       });
     </script>
 

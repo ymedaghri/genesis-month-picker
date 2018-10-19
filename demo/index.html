@@ -19,27 +19,37 @@
   </head>
   <body>
     <div class="vertical-section-container centered">
-      <h3>Basic genesis-month-picker demo</h3>
+    <h3>Basic genesis-month-picker demo</h3>
       <demo-snippet>
         <template>
-            <genesis-month-picker></genesis-month-picker>
+            <genesis-month-picker label="Start date" style="display: flex;"></genesis-month-picker>
         </template>
       </demo-snippet>
       <h3>Localized genesis-month-picker demo</h3>
       <demo-snippet>
         <template>          
-            <genesis-month-picker locale="en-US"></genesis-month-picker>
+            <genesis-month-picker locale="en-US" date_value="2012-10-10"/></genesis-month-picker>
             <genesis-month-picker locale="ru-RU"></genesis-month-picker>
             <genesis-month-picker locale="zh-CN"></genesis-month-picker>
+        </template>
+      </demo-snippet>
+      <h3>ReadOnly genesis-month-picker demo</h3>
+      <demo-snippet>
+        <template>
+            <genesis-month-picker id="gmonth_ro" read_only date_value="2012-10-10"></genesis-month-picker>
+            <button onclick="document.querySelector('#gmonth_ro').__setDateValue('2019-06-03')">Btn SetValue</button>
+            <button onclick="document.querySelector('#gmonth_ro').read_only=false">Btn SetNotReadOnly</button>
+            <button onclick="document.querySelector('#gmonth_ro').read_only=true">Btn SetReadOnly</button>
         </template>
       </demo-snippet>
       <h3>Playground</h3>
       <demo-snippet>
         <template>          
-            <genesis-month-picker id="gmonth" locale="en-US"></genesis-month-picker>
-            <button onclick="document.querySelector('#gmonth').setDateValue('2019-06-03')">Btn SetValue</button>
-            <button onclick="alert(document.querySelector('#gmonth').dateValue)">Btn GetValue</button>
+            <genesis-month-picker id="gmonth" locale="en-US" date_value="2012-10-10"></genesis-month-picker>
+            <button onclick="document.querySelector('#gmonth').__setDateValue('2019-06-03')">Btn SetValue</button>
+            <button onclick="alert(document.querySelector('#gmonth').date_value)">Btn GetValue</button>
             <button onclick="document.querySelector('#gmonth').locale='fr-FR'">Btn SetLocaleFR</button>
+            <button onclick="document.querySelector('#gmonth').label='Toto'">Btn SetLabel</button>
         </template>
       </demo-snippet>
     </div>
