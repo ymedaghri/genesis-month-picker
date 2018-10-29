@@ -11,6 +11,9 @@
     <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
     <link rel="import" href="../genesis-month-picker.html">
+    <link rel="import" href="../../vaadin-dialog/vaadin-dialog.html">
+    <link rel="import" href="../../vaadin-text-field/vaadin-text-field.html">
+    <link rel="import" href="../../vaadin-button/vaadin-button.html">
 
     <custom-style>
       <style is="custom-style" include="demo-pages-shared-styles">
@@ -22,34 +25,92 @@
     <h3>Basic genesis-month-picker demo</h3>
       <demo-snippet>
         <template>
-            <genesis-month-picker label="Start date" style="display: flex;"></genesis-month-picker>
+            <genesis-month-picker label="Start date" style="display: flex;" min_date_value="2018-11-01" max_date_value="2019-06-01"></genesis-month-picker>
         </template>
       </demo-snippet>
+      <h3>Basic genesis-month-picker opened by default</h3>
+      <demo-snippet>
+        <template>
+            <genesis-month-picker label="Start date"  opened></genesis-month-picker>
+        </template>
+      </demo-snippet>
+
+      <h3>genesis-month-picker demo in a Dialog</h3>
+      <demo-snippet>
+        <template>
+        <style>
+        vaadin-dialog-overlay {
+          --_lumo-dialog-transform:none !important;
+        }
+        </style>
+            <vaadin-button onclick="document.getElementById('myDialog').setAttribute('opened',false); document.getElementById('myDialog').setAttribute('opened',true);">Open a Dialog</vaadin-button>
+            <vaadin-dialog id="myDialog">
+                <template>
+                  <div>
+                      <genesis-month-picker locale="en-US" date_value="2012-10-10" /></genesis-month-picker>
+                  </div>
+                  <div>
+                    <vaadin-text-field label="Date of birth" placeholder="Date"></vaadin-text-field>
+                  </div>
+                  <div>
+                    <vaadin-text-field label="Country" placeholder="Country"></vaadin-text-field>
+                  </div>
+                  <div>
+                    <vaadin-text-field label="City" placeholder="City"></vaadin-text-field>
+                  </div>
+                </template>
+            </vaadin-dialog>
+            <vaadin-button onclick="document.getElementById('myDialogWithMPOpen').setAttribute('opened',false); document.getElementById('myDialogWithMPOpen').setAttribute('opened',true);">Open a Dialog with a monthpicker set to opened by default</vaadin-button>
+            <vaadin-dialog id="myDialogWithMPOpen">
+                <template>
+                  <div>
+                      <genesis-month-picker locale="en-US" date_value="2012-10-10" opened /></genesis-month-picker>
+                  </div>
+                  <div>
+                    <vaadin-text-field label="Date of birth" placeholder="Date"></vaadin-text-field>
+                  </div>
+                  <div>
+                    <vaadin-text-field label="Country" placeholder="Country"></vaadin-text-field>
+                  </div>
+                  <div>
+                    <vaadin-text-field label="City" placeholder="City"></vaadin-text-field>
+                  </div>
+                </template>
+              </vaadin-dialog>
+        </template>
+      </demo-snippet>
+
       <h3>Localized genesis-month-picker demo</h3>
       <demo-snippet>
-        <template>          
+        <template>
             <genesis-month-picker locale="en-US" date_value="2012-10-10"/></genesis-month-picker>
             <genesis-month-picker locale="ru-RU"></genesis-month-picker>
             <genesis-month-picker locale="zh-CN"></genesis-month-picker>
         </template>
       </demo-snippet>
+
       <h3>ReadOnly genesis-month-picker demo</h3>
       <demo-snippet>
         <template>
             <genesis-month-picker id="gmonth_ro" read_only date_value="2012-10-10"></genesis-month-picker>
-            <button onclick="document.querySelector('#gmonth_ro').__setDateValue('2019-06-03')">Btn SetValue</button>
-            <button onclick="document.querySelector('#gmonth_ro').read_only=false">Btn SetNotReadOnly</button>
-            <button onclick="document.querySelector('#gmonth_ro').read_only=true">Btn SetReadOnly</button>
+            <vaadin-button onclick="document.querySelector('#gmonth_ro').read_only=false">Set Not Read Only</vaadin-button>
+            <vaadin-button onclick="document.querySelector('#gmonth_ro').read_only=true">Set Read Only</vaadin-button>
+        </template>
+      </demo-snippet>
+      <h3>ReadOnly genesis-month-picker with label</h3>
+      <demo-snippet>
+        <template>
+            <genesis-month-picker id="gmonth_ro" read_only date_value="2012-10-10" label="MyLabel"></genesis-month-picker>
         </template>
       </demo-snippet>
       <h3>Playground</h3>
       <demo-snippet>
-        <template>          
+        <template>
             <genesis-month-picker id="gmonth" locale="en-US" date_value="2012-10-10"></genesis-month-picker>
-            <button onclick="document.querySelector('#gmonth').__setDateValue('2019-06-03')">Btn SetValue</button>
-            <button onclick="alert(document.querySelector('#gmonth').date_value)">Btn GetValue</button>
-            <button onclick="document.querySelector('#gmonth').locale='fr-FR'">Btn SetLocaleFR</button>
-            <button onclick="document.querySelector('#gmonth').label='Toto'">Btn SetLabel</button>
+            <div><vaadin-button onclick="document.querySelector('#gmonth').__setDateValue('2019-06-03')">Set Value</vaadin-button></div>
+            <div><vaadin-button onclick="alert(document.querySelector('#gmonth').date_value)">Get Value</vaadin-button></div>
+            <div><vaadin-button onclick="document.querySelector('#gmonth').locale='fr-FR'">Set Locale FR</vaadin-button></div>
+            <div><vaadin-button onclick="document.querySelector('#gmonth').label='Toto'">Set Label</vaadin-button></div>
         </template>
       </demo-snippet>
     </div>

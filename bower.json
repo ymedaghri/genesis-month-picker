@@ -13,19 +13,19 @@
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0",
-    "genesis-popover": "bisam-rd/genesis-popover#^1.3.3",
-    "vaadin-lumo-styles": "vaadin/vaadin-lumo-styles#^1.2.0",
-    "vaadin-text-field": "vaadin/vaadin-text-field#^2.1.2",
-    "vaadin-button": "vaadin/vaadin-button#^2.1.0",
-    "vaadin-icons": "vaadin/vaadin-icons#^4.2.0",
+    "genesis-popover": "ymedaghri/genesis-popover#^1.1.0",
+    "vaadin-text-field": "vaadin/vaadin-text-field#2.0.2",
+    "vaadin-button": "vaadin/vaadin-button#2.0.1",
+    "vaadin-icons": "vaadin/vaadin-icons#4.1.4",
     "moment": "^2.22.2"
   },
   "devDependencies": {
+    "vaadin-dialog": "vaadin/vaadin-dialog#~2.0.2",
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0",
     "web-component-tester": "Polymer/web-component-tester#^6.0.0",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"
   },
   "resolutions": {
     "polymer": "^2.0.0"
-  }
+     }
 }

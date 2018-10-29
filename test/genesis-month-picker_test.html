@@ -210,14 +210,12 @@
           
           //THEN
           assert.equal(yearField.value, '1900');
-          assert.equal(dateField.value, '31/05/1900');
 
           //WHEN
           previousYearIcon.click();
 
           //THEN
           assert.equal(yearField.value, '1900');
-          assert.equal(dateField.value, '31/05/1900');
         });
 
         test('Clicking on next year is effective only when the year is lower than the max supported year', () => {
@@ -236,8 +234,6 @@
 
           //THEN
           assert.equal(yearField.value, '2199');
-          assert.equal(dateField.value, '31/05/2199');
-          assert.equal(element.date_value, '2199-05-31');
         });
 
         
